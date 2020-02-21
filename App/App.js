@@ -1,4 +1,4 @@
-import { AppRegistry, StyleSheet, Text, View, Platform , ActivityIndicator , TextInput , ScrollView , TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, Platform } from 'react-native';
 import Constants from 'expo-constants';
 import { createAppContainer } from 'react-navigation';
 import { createBottomTabNavigator } from 'react-navigation-tabs';
@@ -6,7 +6,6 @@ import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import * as Permissions from 'expo-permissions';
 import * as Location from 'expo-location';
 import React, { Component } from 'react';
-
 //44c188ad06e81037a011c9486c76fc79
 // key stiri e6f42ce2e83945aba580646d8014590a
 
@@ -77,6 +76,10 @@ class WeatherScreen extends React.Component {
     mainStatus:null,
     description:null,
     weatherStatus: null,
+    clouds:null,
+    wind:null,
+    snow:null,
+    rain:null,
   };
 
   componentDidMount() {
@@ -101,20 +104,26 @@ class WeatherScreen extends React.Component {
     let location = await Location.getCurrentPositionAsync({enableHighAccuracy:true});
     let lat = location.coords.latitude;
     let lon = location.coords.longitude;
+    
     fetch('https://api.openweathermap.org/data/2.5/weather?lat='+lat+'&lon='+lon+'&appid=44c188ad06e81037a011c9486c76fc79')
       .then((response) => {
         return response.json();
       })
       .then((myJson) => {
-        //console.log(myJson.weather[0].main);
-        
+        console.log(myJson);
+        function roundToTwo(num) {    
+          return +(Math.round(num + "e+2")  + "e-2");
+      }
         //console.log(myJson.main.temp);
-        let temp = myJson.main.temp;
-        let temp_max = myJson.main.temp_max;
-        let temp_min = myJson.main.temp_min;
+        let temp = roundToTwo(myJson.main.temp - 273.15);
+        let temp_max = roundToTwo(myJson.main.temp_max - 273.15);
+        let temp_min = roundToTwo(myJson.main.temp_min - 273.15);
         let mainStatus = myJson.weather[0].main;
         let description = myJson.weather[0].description;
-        this.setState({temp, temp_max, temp_min, mainStatus, description})
+        let clouds = myJson.clouds.all;
+        let wind = myJson.wind.speed;
+        
+        this.setState({temp, temp_max, temp_min, mainStatus, description,clouds,wind})
         
       })
 
@@ -133,6 +142,8 @@ class WeatherScreen extends React.Component {
     let temp_min = this.state.temp_min;
     let mainStatus = this.state.mainStatus;
     let description = this.state.description;
+    let clouds = this.state.clouds;
+    let wind = this.state.wind;
     return(
       <View style={styles.main}>
         <Text> {vreme} </Text>
@@ -141,6 +152,8 @@ class WeatherScreen extends React.Component {
         <Text>{temp_max}</Text>
         <Text>{description}</Text>
         <Text>{mainStatus}</Text>
+        <Text>{clouds}</Text>
+        <Text>{wind}</Text>
       </View>
     );
   }
