@@ -6,7 +6,8 @@ import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import * as Permissions from 'expo-permissions';
 import * as Location from 'expo-location';
 import React, { Component } from 'react';
-
+import * as Font from 'expo-font';
+import RNAndroidLocationEnabler from 'react-native-android-location-enabler';
 
 //44c188ad06e81037a011c9486c76fc79
 // key stiri e6f42ce2e83945aba580646d8014590a
@@ -14,10 +15,32 @@ import React, { Component } from 'react';
 
 
 export default class App extends React.Component {
+  state = {
+    fontLoaded: false,
+  };
+  async componentDidMount() {
+    await Font.loadAsync({
+      'open-sans-bold': require('./assets/Fonts/OpenSans-Bold.ttf'),
+      'open-sans-bold-italic': require('./assets/Fonts/OpenSans-BoldItalic.ttf'),
+      'open-sans-extra-bold': require('./assets/Fonts/OpenSans-ExtraBold.ttf'),
+      'open-sans-extra-bold-italic': require('./assets/Fonts/OpenSans-ExtraBoldItalic.ttf'),
+      'open-sans-italic': require('./assets/Fonts/OpenSans-Italic.ttf'),
+      'open-sans-light': require('./assets/Fonts/OpenSans-Light.ttf'),
+      'open-sans-light-italic': require('./assets/Fonts/OpenSans-LightItalic.ttf'),
+      'open-sans-regular': require('./assets/Fonts/OpenSans-Regular.ttf'),
+      'open-sans-semibold': require('./assets/Fonts/OpenSans-SemiBold.ttf'),
+      'open-sans-semibold-italic': require('./assets/Fonts/OpenSans-SemiBoldItalic.ttf'),
+    });
+
+    this.setState({ fontLoaded: true });
+  }
+
 
   render() {
     return (
+      this.state.fontLoaded ? (
         <AppContainer />
+      ) : null
     );
   }
 }
@@ -85,7 +108,10 @@ class WeatherScreen extends React.Component {
     id:null,
   };
 
+  
+
   componentDidMount() {
+    
     if (Platform.OS === 'android' && !Constants.isDevice) {
       this.setState({
         errorMessage: 'Oops, this will not work on Sketch in an Android emulator. Try it on your device!',
@@ -203,25 +229,25 @@ class WeatherScreen extends React.Component {
           <Text style = {styles.yourplace}>YOUR PLACE</Text>
         </View>
         <View style = {styles.description}>
-          <Text style = {{color:"#C0C0C0",fontSize:25}}>{description}</Text>
+          <Text style = {{color:"#C0C0C0",fontSize:25,fontFamily:"open-sans-semibold"}}>{description}</Text>
         </View>
         <View style = {styles.icon}>
           {WeatherImage}
         </View>
         <View style = {styles.temps}>
-            <Text style = {{fontSize:20, color: "#C0C0C0", lineHeight:36}}>{temp_min}°C</Text>
-            <Text style = {{fontSize: 30, color: "#C0C0C0", lineHeight:36}}> / </Text>
-            <Text style = {{fontSize:25}}>{temp}°C</Text>
-            <Text style = {{fontSize: 30, color: "#C0C0C0", lineHeight:36}}> / </Text>
-            <Text style = {{fontSize:20, color: "#C0C0C0", lineHeight:36}}>{temp_max}°C</Text>
+            <Text style = {{fontSize:20, color: "#C0C0C0", lineHeight:36,fontFamily:"open-sans-semibold"}}>{temp_min}°C</Text>
+            <Text style = {{fontSize: 30, color: "#C0C0C0", lineHeight:36,fontFamily:"open-sans-semibold"}}> / </Text>
+            <Text style = {{fontSize:25,fontFamily:"open-sans-semibold"}}>{temp}°C</Text>
+            <Text style = {{fontSize: 30, color: "#C0C0C0", lineHeight:36,fontFamily:"open-sans-semibold"}}> / </Text>
+            <Text style = {{fontSize:20, color: "#C0C0C0", lineHeight:36,fontFamily:"open-sans-semibold"}}>{temp_max}°C</Text>
         </View>
         <View style = {styles.clouds}>
           <Image style = {{width:28, height:28, marginRight: 6}} source = {require("./assets/Weather-images/f/cloud.png")}/>
-          <Text>Cloudiness: {clouds}%</Text>
+          <Text style = {{fontFamily:"open-sans-semibold"}}>Cloudiness: {clouds}%</Text>
         </View>
         <View style = {styles.windd}>
           <Image style = {{width:25, height:25, marginRight: 8}} source = {require("./assets/Weather-images/f/wind-icon.png")}/>
-          <Text >Wind speed: {wind} m/s</Text>
+          <Text style = {{fontFamily:"open-sans-semibold"}} >Wind speed: {wind} m/s</Text>
         </View>
       </View>
     );
@@ -312,6 +338,7 @@ const styles = StyleSheet.create({
   {
     marginTop:35,
     fontSize:35,
+    fontFamily:"open-sans-semibold"
     
     
 
