@@ -7,7 +7,6 @@ import * as Permissions from 'expo-permissions';
 import * as Location from 'expo-location';
 import React, { Component } from 'react';
 import * as Font from 'expo-font';
-import RNAndroidLocationEnabler from 'react-native-android-location-enabler';
 
 //44c188ad06e81037a011c9486c76fc79
 // key stiri e6f42ce2e83945aba580646d8014590a
@@ -68,6 +67,10 @@ class MoneyScreen extends React.Component {
 class NewsScreen extends React.Component {
   state = {
     data:null,
+    URLImage: null,
+    image: null,
+    title:null,
+    siteURL:null,
   };
   componentDidMount(){
     fetch('https://newsapi.org/v2/top-headlines?country=ro&apiKey=e6f42ce2e83945aba580646d8014590a')
@@ -75,17 +78,25 @@ class NewsScreen extends React.Component {
           return response.json();
         })
         .then((myJson) => {
-          //console.log(myJson);
-          let data = JSON.stringify(myJson);
-          this.setState({ data });
+          //console.log(myJson.articles[0]);
+          let ImageURL = JSON.stringify(myJson.articles[0].urlToImage);
+          let title = JSON.stringify(myJson.articles[0].title);
+          let siteURL  =JSON.stringify(myJson.articles[0].url);
+          console.log(ImageURL);
+          this.setState({ URLImage: ImageURL });
         });
     }
 
   render() {
-    let stiri = this.state.data;
+    
     return(
-      <View style={styles.main}>
-        <Text> {stiri} </Text>
+      <View style={{alignItems:"center",justifyContent:"center",marginTop:100}}>
+        <Text>{this.state.URLImage}</Text>
+        {this.state.URLImage ?
+        <Image source={{uri: this.state.URLImage}} style={{width: 130, height:110}}/>
+        : 
+        null
+      }
       </View>
 
     );
@@ -93,6 +104,7 @@ class NewsScreen extends React.Component {
 }
 
 class WeatherScreen extends React.Component {
+  
   state = {
     errorMessage: null,
     temp:null,
@@ -111,7 +123,6 @@ class WeatherScreen extends React.Component {
   
 
   componentDidMount() {
-    
     if (Platform.OS === 'android' && !Constants.isDevice) {
       this.setState({
         errorMessage: 'Oops, this will not work on Sketch in an Android emulator. Try it on your device!',
@@ -121,18 +132,27 @@ class WeatherScreen extends React.Component {
     }
   }
 
-  
-  
   _getLocationAsync = async () => {
-    let { status } = await Permissions.askAsync(Permissions.LOCATION);
+    let location;
+    let { status }  = await Permissions.askAsync(Permissions.LOCATION);
+    console.log(status);
     if (status !== 'granted') {
       this.setState({
-        errorMessage: 'Permission to access location was denied',
+        errorMessage: 'Permission to access location was denied, please activate location and reopen the app.',
       });
 
-    }
-
-    let location = await Location.getCurrentPositionAsync({enableHighAccuracy:true});
+    } else {
+      try
+      {
+        location = await Location.getCurrentPositionAsync({enableHighAccuracy:true});
+      } catch(e){
+        alert('We could not find your position. Please make sure your location service provider is on');
+        console.log('Error while trying to get location: ', e);
+        this.setState({
+          errorMessage: 'Permission to access location was denied, please activate location and reopen the app.',
+        });
+      }
+    
     let lat = location.coords.latitude;
     let lon = location.coords.longitude;
     
@@ -162,9 +182,10 @@ class WeatherScreen extends React.Component {
       .catch((error) => {
         console.error(error);
       });
-  };
-  
+    };
+  }
   render() {
+
 
     
     let temp = this.state.temp;
@@ -174,7 +195,6 @@ class WeatherScreen extends React.Component {
     let description = this.state.description;
     let clouds = this.state.clouds;
     let wind = this.state.wind;
-    let errorMessage = this.state.errorMessage;
     let id = this.state.id;
     let WeatherImage;
     //get day/night
@@ -222,11 +242,19 @@ class WeatherScreen extends React.Component {
       {WeatherImage = <Image style = {{width: 300, height:300}} source ={require("./assets/Weather-images/f/cloud.png")} />}
     if(id == 803 || id == 804)
       {WeatherImage = <Image style = {{width: 300, height:300}} source ={require("./assets/Weather-images/f/cloudy.png")} />}
-    
-      return(
-      <View style={styles.main}>
-        <View>
-          <Text style = {styles.yourplace}>YOUR PLACE</Text>
+
+
+
+      let displayOutput;
+      let errorMessage = this.state.errorMessage;
+      if(errorMessage!=null)
+        displayOutput = <View style={{marginTop:300}}><Text>{errorMessage}</Text></View>
+      else
+        {
+          displayOutput = 
+        <View style={styles.main}>
+          <View>
+          <Text style = {styles.yourplace}>Weather</Text>
         </View>
         <View style = {styles.description}>
           <Text style = {{color:"#C0C0C0",fontSize:25,fontFamily:"open-sans-semibold"}}>{description}</Text>
@@ -250,6 +278,12 @@ class WeatherScreen extends React.Component {
           <Text style = {{fontFamily:"open-sans-semibold"}} >Wind speed: {wind} m/s</Text>
         </View>
       </View>
+        }
+    
+      return(
+        <View style={{alignItems:"center"}}>
+          {displayOutput}
+        </View>
     );
   }
 }
